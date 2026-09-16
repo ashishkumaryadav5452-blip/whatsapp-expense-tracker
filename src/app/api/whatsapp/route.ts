@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 export async function GET() {
-  return new NextResponse("WhatsApp Webhook is Active!", { status: 200 });
+  return new NextResponse("WhatsApp Webhook Active", { status: 200 });
 }
 
 export async function POST(req: Request) {
@@ -11,11 +11,9 @@ export async function POST(req: Request) {
     const incomingMsg = formData.get('Body')?.toString() || '';
     const userPhone = formData.get('From')?.toString() || '';
 
-    // Regex to extract amount (e.g., "Paid 100 for chai" -> 100)
     const amountMatch = incomingMsg.match(/\d+/);
     const amount = amountMatch ? parseFloat(amountMatch[0]) : 0;
 
-    // Save to Supabase
     const { error } = await supabase.from('expenses').insert([
       {
         amount: amount,
@@ -29,9 +27,9 @@ export async function POST(req: Request) {
     let replyText = `Expense Received: "${incomingMsg}".`;
     if (error) {
       console.error('Supabase Error:', error);
-      replyText += ` (Failed to save to database)`;
+      replyText += ` (Failed to save to DB)`;
     } else {
-      replyText += ` Saved to Database! 💰 (Amount: ₹${amount})`;
+      replyText += ` Saved to DB! 💰 (Amount: ₹${amount})`;
     }
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
@@ -43,7 +41,7 @@ export async function POST(req: Request) {
       status: 200,
       headers: { 'Content-Type': 'text/xml' },
     });
-  } catch (error: any) {
-    return new NextResponse(`Error: ${error.message}`, { status: 500 });
+  } catch (err: any) {
+    return new NextResponse(`Error: ${err.message}`, { status: 500 });
   }
 }
